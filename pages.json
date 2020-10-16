@@ -1,0 +1,12 @@
+{
+	"pages": [
+
+		{
+			"path": "pages/index/index",
+			"style": {}
+		}
+	],
+	"globalStyle": {
+		"navigationStyle": "custom"
+	}
+}
