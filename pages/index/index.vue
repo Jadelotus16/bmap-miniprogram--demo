@@ -1,85 +1,66 @@
 <template>
-    <!--<view>
-        <view class="map_container">
-            <map class="map" id="map" :longitude="longitude" :latitude="latitude" scale="14" show-location="true"
-                 :markers="markers" @markertap="makertap"></map>
-        </view>
-        <view class="rgc_info">
-            <text>{{rgcData.address}}</text>
-            <text>{{rgcData.desc}}</text>
-            <text>{{rgcData.business}}</text>
-        </view>
-    </view>-->
-    <web-view src="../mapWeb/map-web.html"></web-view>
+    <map id="allmap" class="allmap" :latitude="latitude" :longitude="longitude" :markers="covers" :scale="5"
+         @regionchange="regionChange">
+    </map>
 </template>
-
 <script>
-    // 引用百度地图微信小程序JSAPI模块
-    var bmap = require('../../libs/bmap-wx.js');
-    var wxMarkerData = [];
+    import mapUtils from "../../static/js/mapUtils";
 
     export default {
-        name: 'map',
         data() {
             return {
-                markers: [],
-                latitude: '',
-                longitude: '',
-                rgcData: {}
+                id: 0, // 使用 marker点击事件 需要填写id
+                title: 'map',
+                latitude: 32.041544,
+                longitude: 118.767413,
+                covers: [{
+                    latitude: 39.909,
+                    longitude: 116.39742,
+                    iconPath: '../../static/map/marker.png',
+                    width: '30px',
+                    height: '30px',
+                }, {
+                    latitude: 39.90,
+                    longitude: 116.39,
+                    iconPath: '../../static/map/marker.png',
+                    width: '30px',
+                    height: '30px',
+                }],
+                allmap: null,
+                mapInfo: {},
+                lastEvent: '',
+
             }
         },
+        onReady() {
+            this.mapContext = uni.createMapContext('allmap');
+        },
         onLoad() {
-            var that = this;
-            // 新建百度地图对象
-            var BMap = new bmap.BMapWX({
-                ak: this.$mayKey
-            });
-            var fail = function (data) {
-                console.log(data)
-            };
-            var success = function (data) {
-                wxMarkerData = data.wxMarkerData;
-                that.markers = wxMarkerData;
-                that.latitude = wxMarkerData[0].latitude;
-                that.longitude = wxMarkerData[0].longitude;
-            };
-            // 发起regeocoding检索请求
-            BMap.regeocoding({
-                fail: fail,
-                success: success,
-                iconPath: '../../static/map/marker.png',
-                iconTapPath: '../../static/map/marker_active.png',
-                width: '30px',
-                height: '30px',
-            });
+            // let event = {type: 'end', causedBy: 'drag'};
+            // this.regionChange(event);
         },
         methods: {
-            makertap: function (e) {
-                var that = this;
-                var id = e.markerId;
-                that.showSearchInfo(wxMarkerData, id);
-            },
-            showSearchInfo: function (data, i) {
-                var that = this;
-                that.rgcData = {
-                    address: '地址：' + data[i].address + '\n',
-                    desc: '描述：' + data[i].desc + '\n',
-                    business: '商圈：' + data[i].business
-                };
+            regionChange(e) {
+                console.log('index.vue regionChange type:', e.type, ', causedBy:', e.causedBy, ', centerLocation:', e.target.centerLocation);
+                if (e.type == 'end') {
+                    if (e.causedBy == 'drag') {//这里直接从e参数中获取当前中心点的经纬度，并更新地图的latitude和longitude
+                        this.mapInfo.lat = e.target.centerLocation.latitude.toFixed(6);//经纬度保留6位小数，避免小数点过多导致的地图重复刷新
+                        this.mapInfo.lng = e.target.centerLocation.longitude.toFixed(6);
+                    }
+                    //只有当地图缩放或者前一次事件为update且当前事件为update时，才调用markerCluster函数
+                    // if ((this.lastEvent == 'update' && e.causedBy == 'update') || e.causedBy == 'scale') {
+                    mapUtils.clusterFunc.call(this);//防抖函数，调用了markerCluster
+                    // }
+                    this.lastEvent = e.causedBy;
+                }
             },
         }
     }
-
 </script>
 
 <style>
-    .map_container {
-        height: 100vh;
+    .allmap {
         width: 100vw;
-    }
-
-    .map {
-        height: 100%;
-        width: 100%;
+        height: 100vh;
     }
 </style>

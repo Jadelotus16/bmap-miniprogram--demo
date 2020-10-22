@@ -8,7 +8,6 @@ Vue.use(BaiduMap, {
 });*/
 
 Vue.config.productionTip = false;
-Vue.prototype.$mayKey = 'MwbFjzhU3fmsw8Wc3UNShYEZ5g8XnrDx';
 
 App.mpType = 'app';
 

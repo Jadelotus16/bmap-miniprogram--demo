@@ -3,10 +3,12 @@
 
 		{
 			"path": "pages/index/index",
-			"style": {}
+			"style": {
+
+			}
 		}
 	],
 	"globalStyle": {
-		"navigationStyle": "custom"
+//		"navigationStyle": "custom"
 	}
 }
